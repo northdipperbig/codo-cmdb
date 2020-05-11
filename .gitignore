@@ -10,6 +10,8 @@ __pycache__/
 
 # Distribution / packaging
 .pydevproject
+.settings
+#.ptp-sync
 .Python
 build/
 develop-eggs/
