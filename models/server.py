@@ -65,6 +65,7 @@ class Server(Base):
     region = Column('region', String(128))  # 区域
     state = Column('state', String(128))  # 状态
     detail = Column('detail', String(128))  # 备注
+    provider_id = Column('provider_id', Integer) #供应商ID
     create_time = Column('create_time', DateTime(), default=datetime.now)  # 创建时间
     update_time = Column('update_time', DateTime(), default=datetime.now, onupdate=datetime.now)  # 记录更新时间
     expired_time = Column('expired_time', DateTime()) #过期时间

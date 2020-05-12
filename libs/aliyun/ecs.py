@@ -20,7 +20,8 @@ import fire
 
 
 class EcsAPi():
-    def __init__(self, access_id, access_key, region, default_admin_user):
+    def __init__(self, provider_id, access_id, access_key, region, default_admin_user):
+        self.provider_id = provider_id
         self.access_id = access_id
         self.access_key = access_key
         self.region = region
@@ -118,7 +119,7 @@ class EcsAPi():
             server_list.append(asset_data)
             # print(asset_data)
             ins_log.read_log('info', '资产信息:{}'.format(asset_data))
-            #ins_log.read_log('info', '阿里云原始资产信息:{}'.format(i))
+            ins_log.read_log('info', '阿里云原始资产信息:{}'.format(i))
         return server_list
 
     def sync_cmdb(self):
@@ -154,6 +155,7 @@ class EcsAPi():
                 os_name = server.get('os_name', 'Null')
                 os_kernel = server.get('os_kernel', 'Null')
                 sn = server.get('sn', 'Null')
+                provider_id = self.provider_id
                 expired_time = datetime.fromisoformat(server.get('expired_time', 'Null')[:10] + "T23:59:59")
 
                 exist_ip_1 = session.query(Server).filter(Server.hostname == hostname).first()
@@ -163,13 +165,14 @@ class EcsAPi():
                          Server.idc: self.account,
                          Server.region: region,
                          Server.expired_time: expired_time,
+                         Server.provider_id: provider_id,
                          Server.admin_user: self.default_admin_user})
 
                 else:
                     if os_type == 'windows':
                         # windows机器不绑定管理用户，资产信息只是平台拿到的一些基础信息
                         new_windows_server = Server(ip=ip, public_ip=ip, private_ip=private_ip, hostname=hostname,
-                                                    port=3389, idc=self.account,
+                                                    port=3389, idc=self.account, provider_id=provider_id,
                                                     region=region,expired_time=expired_time,
                                                     state=self.state)
                         session.add(new_windows_server)
@@ -177,7 +180,7 @@ class EcsAPi():
                     else:
                         # unix机器给默认绑定上管理用户，用于后续登陆机器拿详细资产使用的
                         new_server = Server(ip=ip, public_ip=ip,  private_ip=private_ip,hostname=hostname, port=54822, idc=self.account,
-                                            region=region,expired_time=expired_time,
+                                            region=region,expired_time=expired_time, provider_id=provider_id,
                                             state=self.state, admin_user=self.default_admin_user)
                         session.add(new_server)
 
@@ -266,12 +269,13 @@ def main():
         ins_log.read_log('error', '没有获取到阿里云资产配置信息，跳过')
         return False
     for config in aliyun_configs_list:
+        provider_id = config.get('id')
         access_id = config.get('access_id')
         access_key = mc.my_decrypt(config.get('access_key'))  # 解密后使用
         region = config.get('region')
         default_admin_user = config.get('default_admin_user')
 
-        obj = EcsAPi(access_id, access_key, region, default_admin_user)
+        obj = EcsAPi(provider_id, access_id, access_key, region, default_admin_user)
         obj.index()
 
 
