@@ -51,6 +51,7 @@ class ServerHandler(BaseHandler):
                     data_dict = model_to_dict(msg)
                     data_dict['create_time'] = str(data_dict['create_time'])
                     data_dict['update_time'] = str(data_dict['update_time'])
+                    data_dict['expired_time'] = str(data_dict['expired_time'])
                     server_tags = session.query(Tag.tag_name).outerjoin(ServerTag, Tag.id == ServerTag.tag_id).filter(
                         ServerTag.server_id == data_dict['id']).all()
                     for t in server_tags:
@@ -119,6 +120,7 @@ class ServerHandler(BaseHandler):
                     data_dict = model_to_dict(msg)
                     data_dict['create_time'] = str(data_dict['create_time'])
                     data_dict['update_time'] = str(data_dict['update_time'])
+                    data_dict['expired_time'] = str(data_dict['expired_time'])
                     db_tags = session.query(Tag.tag_name).outerjoin(ServerTag, Tag.id == ServerTag.tag_id).filter(
                         ServerTag.server_id == data_dict['id']).all()
                     for t in db_tags:
@@ -291,6 +293,7 @@ class ServerHandler(BaseHandler):
                     origion_data = model_to_dict(data)
                     origion_data['create_time'] = str(origion_data['create_time'])
                     origion_data['update_time'] = str(origion_data['update_time'])
+                    data_dict['expired_time'] = str(data_dict['expired_time'])
                     new_record = AssetOperationalAudit(username=nickname, request_object='主机', request_host=ip,
                                                        request_method='更新', original_data=origion_data,
                                                        modify_data=modify_data)
@@ -314,6 +317,7 @@ class ServerHandler(BaseHandler):
                         origion_data = model_to_dict(data)
                         origion_data['create_time'] = str(origion_data['create_time'])
                         origion_data['update_time'] = str(origion_data['update_time'])
+                        data_dict['expired_time'] = str(data_dict['expired_time'])
                         new_record = AssetOperationalAudit(username=nickname, request_object='主机',
                                                            request_host=origion_data.get('ip'),
                                                            request_method='删除', original_data=origion_data)
@@ -325,6 +329,7 @@ class ServerHandler(BaseHandler):
                             origion_data = model_to_dict(data)
                             origion_data['create_time'] = str(origion_data['create_time'])
                             origion_data['update_time'] = str(origion_data['update_time'])
+                            data_dict['expired_time'] = str(data_dict['expired_time'])
                             new_record = AssetOperationalAudit(username=nickname, request_object='主机',
                                                                request_host=origion_data.get('ip'),
                                                                request_method='删除', original_data=origion_data)

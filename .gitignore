@@ -9,9 +9,10 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+.project
 .pydevproject
-.settings
-#.ptp-sync
+.settings/
+.ptp-sync/
 .Python
 build/
 develop-eggs/
