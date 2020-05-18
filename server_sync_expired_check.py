@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Contact : northdipperbig@gmail.com
@@ -11,6 +11,7 @@ Desc    :
 """
 
 from libs.aliyun.ecs import main as aliyun_ecs_update
+from libs.aliyun.boss import main as aliyun_boss
 from libs.huaweiyun.huawei_ecs import main as huawei_ecs_update
 from libs.aws.ec2 import main as aws_ec2_update
 from libs.qcloud.cvm import main as qcloud_cvm_update
@@ -114,6 +115,12 @@ def CheckServer():
             for j in normal_server[i]:
                 msg = "服务器【{}】剩余 {} 天\n".format(j["hostname"],j["expired_days"]) + msg
             TgSendMsg("阿里云账号 {} 正常服务器：\n".format(i) + msg)
+    aliyun_balance = aliyun_boss()
+    msg = ""
+    for v in aliyun_balance:
+        account_name = GetProviderAccount(provider_list, v['provider_id'])    
+        msg = "阿里云账户{}余额为{}：{}元\n".format(account_name, v['Currency'], v['AvailableCashAmount']) + msg
+    TgSendMsg("阿里云账户余额情况：\n"+msg)
 
 if __name__ == "__main__":
     #TgSendMsg("封锁又延期了\n你还好吗？")
