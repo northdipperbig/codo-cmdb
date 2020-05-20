@@ -19,17 +19,17 @@ from libs.ucloud.uhost import main as ucloud_uhost_update
 from libs.db_context import DBContext
 from models.server import Server, ServerDetail, AssetConfigs, model_to_dict
 
-import time, datetime, requests, sys
+import time, datetime, requests
 
-aliyun_ecs_update()
-time.sleep(2)
+#aliyun_ecs_update()
+#time.sleep(2)
 aws_ec2_update()
-time.sleep(2)
-qcloud_cvm_update()
-time.sleep(2)
-huawei_ecs_update()
-time.sleep(2)
-ucloud_uhost_update()
+#time.sleep(2)
+#qcloud_cvm_update()
+#time.sleep(2)
+#huawei_ecs_update()
+#time.sleep(2)
+#ucloud_uhost_update()
 
 CurrentDateTime = datetime.datetime.now()
 
@@ -90,10 +90,7 @@ def CheckServer():
             server_state = GetServerState(server_detail_list, data_dict["ip"])
             if server_state == "Stopped":
                 continue
-            if data_dict["expired_time"] == None:
-                expireddays = 100
-            else:
-                expireddays = abs((CurrentDateTime - data_dict["expired_time"]).days) - 1
+            expireddays = abs((CurrentDateTime - data_dict["expired_time"]).days) - 1
             AliyunSubAccount = GetProviderAccount(provider_list, data_dict["provider_id"])
             if expireddays < 7:
                 if not expired_server.get(AliyunSubAccount):
@@ -120,30 +117,10 @@ def CheckServer():
                 normal_server[AliyunSubAccount].append(s)
                 #print(data_dict["hostname"], data_dict["ip"], data_dict["expired_time"], "_______")
                 #normal_server.append(msg)
-        #过期服务器发送
-        for i in expired_server.keys():
-            msg = ""
-            for j in expired_server[i]:
-                msg = """=============================
-服务器名称： {}
-服务器地址： {}
-到期时间  ： {}
-剩余时间  ： {}天
-""".format(j["hostname"], j["ip"], j["expired_time"], j["expired_days"]) + msg
-            TgSendMsg("阿里云账号 {} 即将到期服务器：\n".format(i) + msg)
-        
-        for i in normal_server.keys():
-            msg = ""
-            for j in normal_server[i]:
-                msg = "服务器【{}】剩余 {} 天\n".format(j["hostname"],j["expired_days"]) + msg
-            TgSendMsg("阿里云账号 {} 正常服务器：\n".format(i) + msg)
-    aliyun_balance = aliyun_boss()
-    msg = ""
-    for v in aliyun_balance:
-        account_name = GetProviderAccount(provider_list, v['provider_id'])    
-        msg = "阿里云账户{}余额为{}：{}元\n".format(account_name, v['Currency'], v['AvailableCashAmount']) + msg
-    TgSendMsg("阿里云账户余额情况：\n"+msg)
+        print(expired_server)
+        print(normal_server)
 
 if __name__ == "__main__":
     #TgSendMsg("封锁又延期了\n你还好吗？")
-    CheckServer()
+    #CheckServer()
+    print("End....")

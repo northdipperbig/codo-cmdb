@@ -16,7 +16,8 @@ import fire
 
 
 class Ec2Api():
-    def __init__(self, access_id, access_key, region, default_admin_user):
+    def __init__(self, provider_id, access_id, access_key, region, default_admin_user):
+        self.provider_id = provider_id
         self.access_id = access_id
         self.access_key = access_key
         self.region = region
@@ -46,7 +47,6 @@ class Ec2Api():
             ins_log.read_log('error', 'Not fount response, please check your access_id and access_key...')
             # print('[Error]: Not fount response, please check your access_id and access_key...')
             return False
-
         ret = response['Reservations']
         server_list = []
         if ret:
@@ -64,8 +64,13 @@ class Ec2Api():
                     except (KeyError, TypeError, IndexError):
                         asset_data['hostname'] = i.get('InstanceId', 'Null')  # 拿不到hostnameg给instance_id
 
+                    cpuoption = i.get('CpuOptions')
+                    if cpuoption:
+                        #asset_data["cpu"] = cpuoption["CoreCount"] #用于描述CPU型号
+                        asset_data["cpu_cores"] = cpuoption["CoreCount"] * cpuoption["ThreadsPerCore"]
                     asset_data['region'] = i['Placement'].get('AvailabilityZone', 'Null')
                     asset_data['instance_id'] = i.get('InstanceId', 'Null')
+                    asset_data['sn'] = i.get('InstanceId', 'Null') #sn默认为实例ID
                     asset_data['instance_type'] = i.get('InstanceType', 'Null')
                     asset_data['instance_state'] = i['State'].get('Name', '')
                     asset_data['private_ip'] = i.get('PrivateIpAddress', 'Null')
@@ -84,7 +89,6 @@ class Ec2Api():
         server_list = self.get_server_info()
         if not server_list:
             ins_log.read_log('info', 'Not fount server info...')
-            # print('Not Fount Server Info')
             return False
         with DBContext('w') as session:
             for server in server_list:
@@ -109,17 +113,18 @@ class Ec2Api():
                 os_type = server.get('os_type', 'Null')
                 os_kernel = server.get('os_kernel', 'Null')
                 sn = server.get('sn', 'Null')
+                provider_id = self.provider_id
 
-                exist_hostname = session.query(Server).filter(Server.hostname == hostname).first()
+                exist_hostname = session.query(Server).filter(Server.ip == ip).first()
                 # exist_ip = session.query(Server).filter(Server.ip == ip).first()
                 if exist_hostname:
                     session.query(Server).filter(Server.hostname == hostname).update(
-                        {Server.ip: ip, Server.public_ip: ip, Server.private_ip: private_ip, Server.idc: 'AWS',
+                        {Server.ip: ip, Server.public_ip: ip, Server.private_ip: private_ip, Server.idc: 'AWS', Server.provider_id: provider_id,
                          Server.region: region})
 
                 else:
                     new_server = Server(ip=ip, public_ip=ip, private_ip=private_ip, hostname=hostname, port=22,
-                                        idc=self.account,
+                                        idc=self.account,provider_id=provider_id,
                                         region=region,
                                         state=self.state, admin_user=self.default_admin_user)
                     session.add(new_server)
@@ -128,6 +133,7 @@ class Ec2Api():
                 if exist_ip:
                     session.query(ServerDetail).filter(ServerDetail.ip == ip).update(
                         {ServerDetail.instance_id: instance_id, ServerDetail.instance_type: instance_type,
+                         ServerDetail.cpu: cpu, ServerDetail.cpu_cores: cpu_cores, ServerDetail.sn: sn,
                          ServerDetail.instance_state: instance_state})
                 else:
                     new_serve_detail = ServerDetail(ip=ip, instance_id=instance_id, instance_type=instance_type,
@@ -176,12 +182,13 @@ def main():
         ins_log.read_log('error', '没有获取到AWS资产配置信息，跳过')
         return False
     for config in aws_configs_list:
+        provider_id = config.get('id')
         access_id = config.get('access_id')
         access_key = mc.my_decrypt(config.get('access_key'))  # 解密后使用
         region = config.get('region')
         default_admin_user = config.get('default_admin_user')
 
-        obj = Ec2Api(access_id, access_key, region, default_admin_user)
+        obj = Ec2Api(provider_id, access_id, access_key, region, default_admin_user)
         obj.sync_cmdb()
 
 
