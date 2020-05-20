@@ -63,14 +63,33 @@ def GetProviderAccount(provider_list, provider_id):
             return p["sub_account"]
     return None
 
+def GetServerDetail():
+    serverdetaillist = []
+    with DBContext('r') as session:
+        sdlist = session.query(ServerDetail).all()
+        for sd in sdlist:
+            datadict = model_to_dict(sd)
+            serverdetaillist.append(datadict)
+    return serverdetaillist
+
+def GetServerState(server_list, server_ip):
+    for server in server_list:
+        if server_ip == server["ip"]:
+            return server["instance_state"]
+    return None
+
 def CheckServer():
     expired_server = {}
     normal_server = {}
     provider_list = GetProviderList()
-    with DBContext('w') as session:
+    server_detail_list = GetServerDetail()
+    with DBContext('r') as session:
         serverlist = session.query(Server).filter(Server.region != "")
         for server in serverlist:
             data_dict = model_to_dict(server)
+            server_state = GetServerState(server_detail_list, data_dict["ip"])
+            if server_state == "Stopped":
+                continue
             expireddays = abs((CurrentDateTime - data_dict["expired_time"]).days) - 1
             AliyunSubAccount = GetProviderAccount(provider_list, data_dict["provider_id"])
             if expireddays < 7:
