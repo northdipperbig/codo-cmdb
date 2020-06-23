@@ -124,7 +124,7 @@ if __name__ == "__main__":
     #TgSendMsg("封锁又延期了\n你还好吗？")
     #CheckServer()
     #print("Begin".ljust(50, '.'))
-    #aliyun_ecs_update()
+    aws_ec2_update()
     with DBContext('r') as session:
         #sl = session.query(Server, ServerDetail).filter(Server.public_ip == ServerDetail.ip).all()
         #for s,sd in sl:

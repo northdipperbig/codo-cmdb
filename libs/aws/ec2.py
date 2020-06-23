@@ -104,7 +104,7 @@ class Ec2Api():
 
                 region = server.get('region', 'Null')
                 instance_type = server.get('instance_type', 'Null')
-                instance_state = server.get('instance_state', 'Null')
+                instance_state = server.get('instance_state', 'Null').capitalize()
                 # AWS=接口没看到CPU这类信息
                 cpu = server.get('cpu', 'Null')  # CPU型号
                 cpu_cores = server.get('cpu_cores', 'Null')

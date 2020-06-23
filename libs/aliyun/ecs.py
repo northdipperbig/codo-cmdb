@@ -146,7 +146,7 @@ class EcsAPi():
 
                 region = server.get('region', 'Null')
                 instance_type = server.get('instance_type', 'Null')
-                instance_state = server.get('instance_state', 'Null')
+                instance_state = server.get('instance_state', 'Null').capitalize()
                 cpu = server.get('cpu', 'Null')
                 cpu_cores = server.get('cpu_cores', 'Null')
                 memory = server.get('memory', 'Null')
