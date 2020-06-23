@@ -17,13 +17,13 @@ from libs.aws.ec2 import main as aws_ec2_update
 from libs.qcloud.cvm import main as qcloud_cvm_update
 from libs.ucloud.uhost import main as ucloud_uhost_update
 from libs.db_context import DBContext
-from models.server import Server, ServerDetail, AssetConfigs, model_to_dict
+from models.server import Server, ServerDetail, AssetConfigs, model_to_dict, ServerTag, Tag
 
 import time, datetime, requests
 
 #aliyun_ecs_update()
 #time.sleep(2)
-aws_ec2_update()
+#aws_ec2_update()
 #time.sleep(2)
 #qcloud_cvm_update()
 #time.sleep(2)
@@ -123,4 +123,13 @@ def CheckServer():
 if __name__ == "__main__":
     #TgSendMsg("封锁又延期了\n你还好吗？")
     #CheckServer()
-    print("End....")
+    #print("Begin".ljust(50, '.'))
+    #aliyun_ecs_update()
+    with DBContext('r') as session:
+        #sl = session.query(Server, ServerDetail).filter(Server.public_ip == ServerDetail.ip).all()
+        #for s,sd in sl:
+        #    print(s.hostname, s.idc, s.state, sd.instance_state, sd.ip, s.ip)
+        count = session.query(Server).filter(Server.state != "Stopped").outerjoin(ServerTag, Server.id == ServerTag.server_id
+                                                        ).outerjoin(Tag, Tag.id == ServerTag.tag_id).count()
+        print(count)
+    #print("End".ljust(50, '.'))

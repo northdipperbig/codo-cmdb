@@ -166,6 +166,7 @@ class EcsAPi():
                          Server.region: region,
                          Server.expired_time: expired_time,
                          Server.provider_id: provider_id,
+                         Server.state:instance_state,
                          Server.admin_user: self.default_admin_user})
 
                 else:
@@ -174,7 +175,7 @@ class EcsAPi():
                         new_windows_server = Server(ip=ip, public_ip=ip, private_ip=private_ip, hostname=hostname,
                                                     port=3389, idc=self.account, provider_id=provider_id,
                                                     region=region,expired_time=expired_time,
-                                                    state=self.state)
+                                                    state=instance_state)
                         session.add(new_windows_server)
 
                     else:

@@ -120,13 +120,14 @@ class Ec2Api():
                 if exist_hostname:
                     session.query(Server).filter(Server.hostname == hostname).update(
                         {Server.ip: ip, Server.public_ip: ip, Server.private_ip: private_ip, Server.idc: 'AWS', Server.provider_id: provider_id,
-                         Server.region: region})
+                         Server.region: region, Server.state: instance_state
+                         })
 
                 else:
                     new_server = Server(ip=ip, public_ip=ip, private_ip=private_ip, hostname=hostname, port=22,
                                         idc=self.account,provider_id=provider_id,
                                         region=region,
-                                        state=self.state, admin_user=self.default_admin_user)
+                                        state=instance_state, admin_user=self.default_admin_user)
                     session.add(new_server)
 
                 exist_ip = session.query(ServerDetail).filter(ServerDetail.ip == ip).first()
